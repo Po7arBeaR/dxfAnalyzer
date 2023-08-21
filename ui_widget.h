@@ -23,6 +23,7 @@ class Ui_Widget
 public:
     QPushButton *PB_Load;
     QTableWidget *tw_AnalyzedData;
+    QPushButton *pb_output;
 
     void setupUi(QWidget *Widget)
     {
@@ -35,6 +36,9 @@ public:
         tw_AnalyzedData = new QTableWidget(Widget);
         tw_AnalyzedData->setObjectName("tw_AnalyzedData");
         tw_AnalyzedData->setGeometry(QRect(10, 50, 191, 521));
+        pb_output = new QPushButton(Widget);
+        pb_output->setObjectName("pb_output");
+        pb_output->setGeometry(QRect(110, 20, 80, 24));
 
         retranslateUi(Widget);
 
@@ -45,6 +49,7 @@ public:
     {
         Widget->setWindowTitle(QCoreApplication::translate("Widget", "Widget", nullptr));
         PB_Load->setText(QCoreApplication::translate("Widget", "\345\257\274\345\205\245", nullptr));
+        pb_output->setText(QCoreApplication::translate("Widget", "\350\276\223\345\207\272", nullptr));
     } // retranslateUi
 
 };

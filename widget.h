@@ -10,8 +10,11 @@
 #include <QGraphicsItem>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QTableWidgetItem>
+
 #include "interactiveview.h"
 #include "dxfreader.h"
+#include "findpost.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
 QT_END_NAMESPACE
@@ -28,7 +31,11 @@ public:
 private slots:
     void on_PB_Load_clicked();
 
-    void on_tw_AnalyzedData_cellClicked(int row, int column);
+  //  void on_tw_AnalyzedData_cellClicked(int row, int column);
+
+
+
+    void on_tw_AnalyzedData_itemDoubleClicked(QTableWidgetItem *item);
 
 private:
     Ui::Widget *ui;
@@ -48,6 +55,10 @@ private:
     QList<DL_ArcData> ArcData ;
     QList<DL_InsertData> InsertData;
     int tbRowCount;
+    qreal DistanceOfPost;
+    QGraphicsLineItem *CrosslineItem1;
+    QGraphicsLineItem *CrosslineItem2 ;
+    QList<PostType> PostList;
 };
 
 #endif // WIDGET_H

@@ -12,12 +12,14 @@ SOURCES += \
     dxflib/dl_dxf.cpp \
     dxflib/dl_writer_ascii.cpp \
     dxfreader.cpp \
+    findpost.cpp \
     interactiveview.cpp \
     main.cpp \
     widget.cpp
 
 HEADERS += \
     dxfreader.h \
+    findpost.h \
     interactiveview.h \
     widget.h\
     dxflib/dl_attributes.h \
