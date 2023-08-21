@@ -24,7 +24,7 @@ Widget::Widget(QWidget *parent)
     fileDialog->setNameFilter(tr("File(*.dxf* *.DXF*)"));
     fileDialog->setFileMode(QFileDialog::ExistingFiles);
     fileDialog->setViewMode(QFileDialog::Detail);
-    scene->setBackgroundBrush(QBrush(QColor(0, 0, 0)));
+    scene->setBackgroundBrush(QBrush(QColor(255, 255, 255)));
     View->setInteractive(true);
     View->setDragMode(QGraphicsView::ScrollHandDrag);
     View->setScene(scene);
@@ -68,7 +68,7 @@ void Widget::on_PB_Load_clicked()
     scene->clear();
     dxfReader dxfreader(FileNames.join("/"));
     QPen pen;
-    pen.setColor(Qt::yellow);
+    pen.setColor(Qt::black);
     pen.setWidth(0);
     for(auto d: dxfreader.dxfLines) {
         QLineF line(d.x1 , d.y1, d.x2,  d.y2);
@@ -78,6 +78,7 @@ void Widget::on_PB_Load_clicked()
         lineItem->setPen(pen);
         scene->addItem(lineItem);
     }
+     pen.setColor(Qt::blue);
     for(auto d:dxfreader.dxfCircle)
     {
         QRectF Rect(d.cx-d.radius,d.cy-d.radius,d.radius*2,d.radius*2);
