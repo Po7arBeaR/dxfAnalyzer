@@ -19,8 +19,7 @@ Widget::Widget(QWidget *parent)
     ,hLayoutZoom(new QHBoxLayout)
     ,vLayoutParam(new QVBoxLayout )
     ,hLayoutMain(new QHBoxLayout)
-    ,CrosslineItem1(new QGraphicsLineItem)
-    ,CrosslineItem2(new QGraphicsLineItem)
+
 {
     ui->setupUi(this);
     fileDialog->setWindowTitle("请选择文件");
@@ -37,6 +36,7 @@ Widget::Widget(QWidget *parent)
     View->setRenderHints(QPainter::SmoothPixmapTransform);
     hLayoutYOffset->addWidget(ui->PB_Load);
     hLayoutYOffset->addWidget(ui->pb_output);
+    hLayoutYOffset->addWidget(ui->pb_Config);
     vLayoutParam->addLayout(hLayoutYOffset);
     vLayoutParam->addWidget(ui->tw_AnalyzedData);
     hLayoutZoom->addWidget(View);
@@ -44,6 +44,7 @@ Widget::Widget(QWidget *parent)
     hLayoutMain->addLayout(hLayoutZoom);
     this->setLayout(hLayoutMain);
     tbRowCount=0;
+    DistanceOfPost=9.2;
 }
 
 Widget::~Widget()
@@ -75,14 +76,19 @@ void Widget::on_PB_Load_clicked()
     ui->tw_AnalyzedData->clear();
     ui->tw_AnalyzedData->setColumnCount(3);
     ui->tw_AnalyzedData->setRowCount(0);
+
     scene->clear();
+    CircleData.clear();
+    CrosslineItem1=new QGraphicsLineItem();
+    CrosslineItem2=new QGraphicsLineItem();
     dxfReader dxfreader(FileNames.join("/"));
     QPen pen;
+    CrosslineFlag=true;
     pen.setColor(Qt::black);
     pen.setWidth(0);
     for(auto d: dxfreader.dxfLines) {
         QLineF line(d.x1 , d.y1, d.x2,  d.y2);
-        LinesData << d;
+        //LinesData << d;
         QGraphicsLineItem *lineItem = new QGraphicsLineItem(line);
         pen.setCosmetic(true);
         lineItem->setPen(pen);
@@ -130,26 +136,98 @@ void Widget::on_PB_Load_clicked()
     }
     qDebug()<<dxfreader.dxfCircle.count();
     qDebug()<<CircleData.count();
+    bool jump=0;
+    QList<int> Connected;
+        for (int i =0 ; i <CircleData.count() ;i++)
+        {
+         jump=0;
+         for (auto k :Connected)
+         {
+            if(k==i)jump=true;
+         }
 
-//    for (int i =0 ; i <CircleData.count() ;i++)
-//    {
-//         for(int j=0;j<CircleData.count();j++)
-//         {
-//            if(i==j)continue;
-//            if( CircleData[i].cx+DistanceOfPost==CircleData[j].cx &&
-//                CircleData[i].cy+DistanceOfPost==CircleData[j].cy &&
-//                CircleData[i].cx-DistanceOfPost==CircleData[j].cx &&
-//                CircleData[i].cy-DistanceOfPost==CircleData[j].cy )
-//            {
-//                PostType val;
-//                val.cd(CircleData[i].cx,CircleData[i].cy,CircleData[i].cz,CircleData[i].radius);
-//                val.Angel=90;
-//                val.ConnectNum=1;
-//                PostList.append(val);
-//            }
-//         }
-//    }
-    for (auto circle :  CircleData)
+         if(jump)continue;
+             for(int j=0;j<CircleData.count();j++)
+             {
+            if(i==j)continue;
+
+            if(QString::number(CircleData[i].cx+ DistanceOfPost,'f',2)==QString::number(CircleData[j].cx,'f',2)&&
+                QString::number(CircleData[i].cy,'f',2)==QString::number(CircleData[j].cy,'f',2))
+             {
+                BatteryMark bm;
+                bm.Top.cx=CircleData[i].cx;
+                bm.Top.cy=CircleData[i].cy;
+                bm.Top.radius=CircleData[i].radius;
+                bm.Bottom.cx=CircleData[j].cx;
+                bm.Bottom.cy=CircleData[j].cy;
+                bm.Bottom.radius=CircleData[j].radius;
+                bm.Angel=90;
+                bm.TopNumb=i;
+                bm.BottomNumb=j;
+                BatteryList.push_back(bm);
+                Connected<<j;
+             }
+            if(QString::number(CircleData[i].cx- DistanceOfPost,'f',2)==QString::number(CircleData[j].cx,'f',2)&&
+                QString::number(CircleData[i].cy,'f',2)==QString::number(CircleData[j].cy,'f',2))
+             {
+                BatteryMark bm;
+                bm.Top.cx=CircleData[j].cx;
+                bm.Top.cy=CircleData[j].cy;
+                bm.Top.radius=CircleData[j].radius;
+                bm.Bottom.cx=CircleData[i].cx;
+                bm.Bottom.cy=CircleData[i].cy;
+                bm.Bottom.radius=CircleData[j].radius;
+                bm.Angel=90;
+                bm.TopNumb=j;
+                bm.BottomNumb=i;
+                BatteryList.push_back(bm);
+                Connected<<j;
+             }
+            if(QString::number(CircleData[i].cx,'f',2)==QString::number(CircleData[j].cx,'f',2)&&
+                QString::number(CircleData[i].cy+ DistanceOfPost,'f',2)==QString::number(CircleData[j].cy,'f',2))
+             {
+                BatteryMark bm;
+                bm.Top.cx=CircleData[i].cx;
+                bm.Top.cy=CircleData[i].cy;
+                bm.Top.radius=CircleData[i].radius;
+                bm.Bottom.cx=CircleData[j].cx;
+                bm.Bottom.cy=CircleData[j].cy;
+                bm.Bottom.radius=CircleData[j].radius;
+                bm.Angel=0;
+                bm.TopNumb=i;
+                bm.BottomNumb=j;
+                BatteryList.push_back(bm);
+                Connected<<j;
+             }
+            if(QString::number(CircleData[i].cx,'f',2)==QString::number(CircleData[j].cx,'f',2)&&
+                QString::number(CircleData[i].cy- DistanceOfPost,'f',2)==QString::number(CircleData[j].cy,'f',2))
+             {
+                BatteryMark bm;
+                bm.Top.cx=CircleData[j].cx;
+                bm.Top.cy=CircleData[j].cy;
+                 bm.Top.radius=CircleData[j].radius;
+                bm.Bottom.cx=CircleData[i].cx;
+                bm.Bottom.cy=CircleData[i].cy;
+                 bm.Bottom.radius=CircleData[i].radius;
+                bm.Angel=0;
+                bm.TopNumb=j;
+                bm.BottomNumb=i;
+                BatteryList.push_back(bm);
+                Connected<<j;
+             }
+
+             }
+        }
+        for (int i = 0; i < BatteryList.count(); i++)
+        {
+             DL_CircleData top(BatteryList[i].Top.cx,BatteryList[i].Top.cy,0,BatteryList[i].Top.radius);
+
+             BatteryPostData<<top;
+             DL_CircleData Bottom(BatteryList[i].Bottom.cx,BatteryList[i].Bottom.cy,0,BatteryList[i].Bottom.radius);
+              BatteryPostData<<Bottom;
+        }
+
+        for (auto circle: BatteryPostData)
     {
         tbRowCount= ui->tw_AnalyzedData->rowCount();
         ui->tw_AnalyzedData->insertRow(tbRowCount);
@@ -202,15 +280,23 @@ void Widget::on_tw_AnalyzedData_itemDoubleClicked(QTableWidgetItem *item)
         r=r*10;
         QLineF line1(x,y+r,x,y-r);
         QLineF line2(x+r,y,x-r,y);
+
        // QGraphicsLineItem *lineItem1 = new QGraphicsLineItem(line1);
       //  QGraphicsLineItem *lineItem2 = new QGraphicsLineItem(line2);
         CrosslineItem1->setLine(line1);
         CrosslineItem2->setLine(line2);
+
         pen.setCosmetic(true);
+        if(CrosslineFlag)
+        {
+        CrosslineFlag=false;
         CrosslineItem1->setPen(pen);
-        scene->addItem(CrosslineItem1);
         CrosslineItem2->setPen(pen);
+        scene->addItem(CrosslineItem1);
         scene->addItem(CrosslineItem2);
+
+        }
+
 
 }
 

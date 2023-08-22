@@ -54,11 +54,14 @@ private:
     QList<DL_CircleData> CircleData;
     QList<DL_ArcData> ArcData ;
     QList<DL_InsertData> InsertData;
+    QList<DL_CircleData> BatteryPostData;
     int tbRowCount;
+    bool CrosslineFlag;
     qreal DistanceOfPost;
     QGraphicsLineItem *CrosslineItem1;
     QGraphicsLineItem *CrosslineItem2 ;
-    QList<PostType> PostList;
+    QList<BatteryMark> BatteryList;
+
 };
 
 #endif // WIDGET_H

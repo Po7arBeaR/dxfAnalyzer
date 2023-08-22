@@ -10,22 +10,28 @@ struct PostType
 {
     PostType()
     {
-
-        ConnectNum=-1;
-        Angel=-1;
+        cx=0;
+        cy=0;
+        radius=0;
     }
-    DL_CircleData cd(double acx, double acy, double acz,
-                     double aRadius);
-    int ConnectNum;
-    int Angel;
-};
-class FindPost:QObject
-{
-    Q_OBJECT
-public:
-    FindPost();
-public:
+    qreal cx;
+    qreal cy;
 
+    qreal radius;
+
+};
+class BatteryMark
+{
+
+public:
+    BatteryMark();
+
+public:
+    PostType Top;
+    PostType Bottom;
+    int TopNumb;
+    int BottomNumb;
+    int Angel;
 };
 
 #endif // FINDPOST_H

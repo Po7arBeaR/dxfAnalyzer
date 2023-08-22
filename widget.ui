@@ -39,7 +39,7 @@
   <widget class="QPushButton" name="pb_output">
    <property name="geometry">
     <rect>
-     <x>110</x>
+     <x>90</x>
      <y>20</y>
      <width>80</width>
      <height>24</height>
@@ -47,6 +47,19 @@
    </property>
    <property name="text">
     <string>输出</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pb_Config">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>20</y>
+     <width>71</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>配置</string>
    </property>
   </widget>
  </widget>

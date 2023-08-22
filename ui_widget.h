@@ -24,6 +24,7 @@ public:
     QPushButton *PB_Load;
     QTableWidget *tw_AnalyzedData;
     QPushButton *pb_output;
+    QPushButton *pb_Config;
 
     void setupUi(QWidget *Widget)
     {
@@ -38,7 +39,10 @@ public:
         tw_AnalyzedData->setGeometry(QRect(10, 50, 191, 521));
         pb_output = new QPushButton(Widget);
         pb_output->setObjectName("pb_output");
-        pb_output->setGeometry(QRect(110, 20, 80, 24));
+        pb_output->setGeometry(QRect(90, 20, 80, 24));
+        pb_Config = new QPushButton(Widget);
+        pb_Config->setObjectName("pb_Config");
+        pb_Config->setGeometry(QRect(170, 20, 71, 24));
 
         retranslateUi(Widget);
 
@@ -50,6 +54,7 @@ public:
         Widget->setWindowTitle(QCoreApplication::translate("Widget", "Widget", nullptr));
         PB_Load->setText(QCoreApplication::translate("Widget", "\345\257\274\345\205\245", nullptr));
         pb_output->setText(QCoreApplication::translate("Widget", "\350\276\223\345\207\272", nullptr));
+        pb_Config->setText(QCoreApplication::translate("Widget", "\351\205\215\347\275\256", nullptr));
     } // retranslateUi
 
 };
