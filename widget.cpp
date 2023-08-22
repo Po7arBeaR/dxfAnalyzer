@@ -239,7 +239,7 @@ void Widget::on_PB_Load_clicked()
     auto d=dxfreader.dxfCircle.at(0);
 
     View->centerOn(d.cx,d.cy);
-
+    View->setTransform(QTransform().scale(1, -1));
 }
 
 
