@@ -25,13 +25,18 @@ class BatteryMark
 
 public:
     BatteryMark();
-
+public:
+//    bool operator<(const BatteryMark& other) const
+//    {
+//        return Top.cy<other.Top.cy;
+//    }
 public:
     PostType Top;
     PostType Bottom;
     int TopNumb;
     int BottomNumb;
     int Angel;
+
 };
 
 #endif // FINDPOST_H

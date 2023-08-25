@@ -13,6 +13,8 @@ dxfReader::dxfReader(const QString &fileName, QObject *parent)
     }
     delete dxf;
     dxf = nullptr;
+
+
 }
 void dxfReader::addLine(const DL_LineData &data)
 {

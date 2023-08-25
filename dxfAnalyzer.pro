@@ -9,16 +9,20 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    asyncthread.cpp \
     dxflib/dl_dxf.cpp \
     dxflib/dl_writer_ascii.cpp \
     dxfreader.cpp \
+    dxfreaderbydxfrw.cpp \
     findpost.cpp \
     interactiveview.cpp \
     main.cpp \
     widget.cpp
 
 HEADERS += \
+    asyncthread.h \
     dxfreader.h \
+    dxfreaderbydxfrw.h \
     findpost.h \
     interactiveview.h \
     widget.h\
@@ -46,3 +50,10 @@ CONFIG += embed_translations
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+unix:!macx: LIBS += -L$$PWD/dxfrw/ -llibdxfrw
+
+INCLUDEPATH += $$PWD/dxfrw
+DEPENDPATH += $$PWD/dxfrw
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/dxfrw/liblibdxfrw.a

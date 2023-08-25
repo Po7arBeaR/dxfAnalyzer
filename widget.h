@@ -15,6 +15,7 @@
 #include "interactiveview.h"
 #include "dxfreader.h"
 #include "findpost.h"
+#include "asyncthread.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
 QT_END_NAMESPACE
@@ -57,11 +58,16 @@ private:
     QList<DL_CircleData> BatteryPostData;
     int tbRowCount;
     bool CrosslineFlag;
-    qreal DistanceOfPost;
+    qreal scale;//缩放
+    qreal DistanceOfPost;//极柱
+    bool sortDistance;
     QGraphicsLineItem *CrosslineItem1;
     QGraphicsLineItem *CrosslineItem2 ;
     QList<BatteryMark> BatteryList;
-
+public slots:
+    void DrawItem(QList<DL_CircleData> clist,QList<DL_LineData> llist);
+private:
+    asyncThread * thread;
 };
 
 #endif // WIDGET_H

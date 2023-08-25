@@ -4,7 +4,6 @@
 #include <QObject>
 #include "dxflib/dl_dxf.h"
 #include "dxflib/dl_creationadapter.h"
-
 class dxfReader: public QObject, public DL_CreationAdapter
 {
     Q_OBJECT
@@ -18,6 +17,7 @@ public:
     QList<DL_TextData> dxfText;
     QList<DL_CircleData> dxfCircle;
     QList<DL_ArcData> dxfArc;
+
 private:
     QString fileName;
 };

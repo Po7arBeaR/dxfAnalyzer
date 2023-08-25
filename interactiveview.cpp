@@ -68,6 +68,7 @@ void InteractiveView::keyPressEvent(QKeyEvent *event)
     switch (event->key()) {
     case Qt::Key_Up:
         translate(QPointF(0, -2));  // 上移
+        qDebug()<<"upMoving";
         break;
     case Qt::Key_Down:
         translate(QPointF(0, 2));  // 下移
@@ -181,7 +182,7 @@ void InteractiveView::translate(QPointF delta)
 
     // view 根据鼠标下的点作为锚点来定位 scene
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-    QPoint newCenter(static_cast<int>(VIEW_WIDTH / 2 - delta.x()),  static_cast<int>(VIEW_HEIGHT / 2 - delta.y()));
+    QPoint newCenter(static_cast<int>(VIEW_WIDTH / 2 - delta.x()),  static_cast<int>(VIEW_HEIGHT / 2 + delta.y()));
     centerOn(mapToScene(newCenter));
 
     // scene 在 view 的中心点作为锚点
