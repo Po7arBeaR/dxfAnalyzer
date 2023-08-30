@@ -3,7 +3,9 @@
 
 asyncThread::asyncThread(QObject *parent)
     : QThread{parent}
+
 {
 
 }
+
 

@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += concurrent core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,18 +13,18 @@ SOURCES += \
     dxflib/dl_dxf.cpp \
     dxflib/dl_writer_ascii.cpp \
     dxfreader.cpp \
-    dxfreaderbydxfrw.cpp \
     findpost.cpp \
     interactiveview.cpp \
+    loadingdialog.cpp \
     main.cpp \
     widget.cpp
 
 HEADERS += \
     asyncthread.h \
     dxfreader.h \
-    dxfreaderbydxfrw.h \
     findpost.h \
     interactiveview.h \
+    loadingdialog.h \
     widget.h\
     dxflib/dl_attributes.h \
     dxflib/dl_codes.h \
