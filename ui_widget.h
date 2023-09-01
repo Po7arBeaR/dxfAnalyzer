@@ -13,7 +13,6 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
-#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QTableWidget>
 #include <QtWidgets/QWidget>
@@ -27,14 +26,14 @@ public:
     QTableWidget *tw_AnalyzedData;
     QPushButton *pb_output;
     QPushButton *pb_Config;
-    QLineEdit *lineEdit;
-    QLineEdit *lineEdit_2;
     QLabel *label;
     QLabel *label_2;
-    QLineEdit *lineEdit_3;
-    QLineEdit *lineEdit_4;
     QLabel *label_3;
     QLabel *label_4;
+    QLabel *lab_x1;
+    QLabel *lab_x2;
+    QLabel *lab_y1;
+    QLabel *lab_y2;
 
     void setupUi(QWidget *Widget)
     {
@@ -53,30 +52,30 @@ public:
         pb_Config = new QPushButton(Widget);
         pb_Config->setObjectName("pb_Config");
         pb_Config->setGeometry(QRect(160, 0, 71, 24));
-        lineEdit = new QLineEdit(Widget);
-        lineEdit->setObjectName("lineEdit");
-        lineEdit->setGeometry(QRect(20, 550, 91, 23));
-        lineEdit_2 = new QLineEdit(Widget);
-        lineEdit_2->setObjectName("lineEdit_2");
-        lineEdit_2->setGeometry(QRect(140, 550, 91, 23));
         label = new QLabel(Widget);
         label->setObjectName("label");
-        label->setGeometry(QRect(0, 550, 21, 16));
+        label->setGeometry(QRect(0, 560, 21, 16));
         label_2 = new QLabel(Widget);
         label_2->setObjectName("label_2");
-        label_2->setGeometry(QRect(120, 550, 21, 16));
-        lineEdit_3 = new QLineEdit(Widget);
-        lineEdit_3->setObjectName("lineEdit_3");
-        lineEdit_3->setGeometry(QRect(140, 580, 91, 23));
-        lineEdit_4 = new QLineEdit(Widget);
-        lineEdit_4->setObjectName("lineEdit_4");
-        lineEdit_4->setGeometry(QRect(20, 582, 91, 21));
+        label_2->setGeometry(QRect(120, 560, 21, 16));
         label_3 = new QLabel(Widget);
         label_3->setObjectName("label_3");
-        label_3->setGeometry(QRect(0, 580, 21, 16));
+        label_3->setGeometry(QRect(0, 590, 21, 16));
         label_4 = new QLabel(Widget);
         label_4->setObjectName("label_4");
-        label_4->setGeometry(QRect(120, 580, 21, 16));
+        label_4->setGeometry(QRect(120, 590, 21, 16));
+        lab_x1 = new QLabel(Widget);
+        lab_x1->setObjectName("lab_x1");
+        lab_x1->setGeometry(QRect(30, 560, 71, 16));
+        lab_x2 = new QLabel(Widget);
+        lab_x2->setObjectName("lab_x2");
+        lab_x2->setGeometry(QRect(30, 590, 81, 16));
+        lab_y1 = new QLabel(Widget);
+        lab_y1->setObjectName("lab_y1");
+        lab_y1->setGeometry(QRect(150, 560, 81, 16));
+        lab_y2 = new QLabel(Widget);
+        lab_y2->setObjectName("lab_y2");
+        lab_y2->setGeometry(QRect(150, 590, 81, 16));
 
         retranslateUi(Widget);
 
@@ -93,6 +92,10 @@ public:
         label_2->setText(QCoreApplication::translate("Widget", "y1:", nullptr));
         label_3->setText(QCoreApplication::translate("Widget", "x2:", nullptr));
         label_4->setText(QCoreApplication::translate("Widget", "y2:", nullptr));
+        lab_x1->setText(QString());
+        lab_x2->setText(QString());
+        lab_y1->setText(QString());
+        lab_y2->setText(QString());
     } // retranslateUi
 
 };

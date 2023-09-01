@@ -18,7 +18,9 @@ InteractiveView::InteractiveView(QWidget *parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setCursor(Qt::PointingHandCursor);
     setRenderHint(QPainter::Antialiasing);
-
+    setCacheMode(CacheBackground);
+    setViewportUpdateMode(BoundingRectViewportUpdate);
+    setDragMode(ScrollHandDrag);
     setSceneRect(INT_MIN/2, INT_MIN/2, INT_MAX, INT_MAX);
     centerOn(0, 0);
 }

@@ -62,31 +62,11 @@
     <string>配置</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>550</y>
-     <width>91</width>
-     <height>23</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="lineEdit_2">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>550</y>
-     <width>91</width>
-     <height>23</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>550</y>
+     <y>560</y>
      <width>21</width>
      <height>16</height>
     </rect>
@@ -99,7 +79,7 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>550</y>
+     <y>560</y>
      <width>21</width>
      <height>16</height>
     </rect>
@@ -108,31 +88,11 @@
     <string>y1:</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit_3">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>580</y>
-     <width>91</width>
-     <height>23</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="lineEdit_4">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>582</y>
-     <width>91</width>
-     <height>21</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>580</y>
+     <y>590</y>
      <width>21</width>
      <height>16</height>
     </rect>
@@ -145,13 +105,65 @@
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>580</y>
+     <y>590</y>
      <width>21</width>
      <height>16</height>
     </rect>
    </property>
    <property name="text">
     <string>y2:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lab_x1">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>560</y>
+     <width>71</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lab_x2">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>590</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lab_y1">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>560</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lab_y2">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>590</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
  </widget>

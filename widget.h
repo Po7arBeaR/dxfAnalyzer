@@ -17,6 +17,7 @@
 #include "loadingdialog.h"
 #include "findpost.h"
 #include "asyncthread.h"
+#include "frame_config.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
 QT_END_NAMESPACE
@@ -52,6 +53,7 @@ private:
     QVBoxLayout *vLayoutParam;
     QHBoxLayout *hLayoutMain;
     QGridLayout *gLayoutZoffset;
+    Frame_Config* ConfigQFrame;
 private:
     QList<DL_LineData> LinesData;
     QList<DL_CircleData> CircleData;
@@ -70,7 +72,7 @@ private:
     QList<BatteryMark> BatteryList;
     QTextDocument *MarkPosText;
     LoadingDialog * LoadDialog;
-    QMap<int,QList<BatteryMark>> srow;
+    QList<BatteryMark> SortedList;
 //    qreal BasePointx;
 //    qreal BasePointy;
    // QProgressDialog* m_ProgressD;

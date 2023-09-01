@@ -14,6 +14,7 @@ SOURCES += \
     dxflib/dl_writer_ascii.cpp \
     dxfreader.cpp \
     findpost.cpp \
+    frame_config.cpp \
     interactiveview.cpp \
     loadingdialog.cpp \
     main.cpp \
@@ -23,6 +24,7 @@ HEADERS += \
     asyncthread.h \
     dxfreader.h \
     findpost.h \
+    frame_config.h \
     interactiveview.h \
     loadingdialog.h \
     widget.h\

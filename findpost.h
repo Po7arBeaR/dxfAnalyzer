@@ -16,6 +16,24 @@ struct PostType
         cy=0;
         radius=0;
     }
+   PostType(const  PostType &obj)
+    {
+        cx=obj.cx;
+        cy=obj.cy;
+        radius=obj.radius;
+    }
+    PostType operator=(const  PostType &obj)
+    {
+        if(this!=&obj)
+        {
+            cx=obj.cx;
+            cy=obj.cy;
+            radius=obj.radius;
+
+        }
+
+           return *this;
+    }
     qreal cx;
     qreal cy;
     qreal radius;
@@ -26,6 +44,28 @@ class BatteryMark
 
 public:
     BatteryMark();
+    BatteryMark(const BatteryMark & obj)
+    {
+        Top=obj.Top;
+           this->Angle=obj.Angle;
+        this->Bottom=obj.Bottom;
+        this->Scale=obj.Scale;
+        this->BottomNumb=obj.BottomNumb;
+        this->TopNumb=obj.TopNumb;
+    }
+    BatteryMark operator=(const BatteryMark &obj)
+    {
+        if(this!=&obj)
+        {
+             Top=obj.Top;
+            this->Angle=obj.Angle;
+             this->Bottom=obj.Bottom;
+             this->Scale=obj.Scale;
+             this->BottomNumb=obj.BottomNumb;
+             this->TopNumb=obj.TopNumb;
+        }
+        return *this;
+    }
 public:
 //    bool operator<(const BatteryMark& other) const
 //    {
@@ -79,7 +119,7 @@ public:
     qreal Scale;
     int TopNumb;
     int BottomNumb;
-    int Angel;
+    int Angle;
 
 };
 

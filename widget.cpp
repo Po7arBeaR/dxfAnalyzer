@@ -14,7 +14,7 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
-    , fileDialog(new QFileDialog )
+    , fileDialog(new QFileDialog )   
     ,scene(new QGraphicsScene)
     ,View(new InteractiveView)
     , hLayoutXCenter(new QHBoxLayout)
@@ -25,6 +25,7 @@ Widget::Widget(QWidget *parent)
     ,vLayoutParam(new QVBoxLayout )
     ,hLayoutMain(new QHBoxLayout)
     ,gLayoutZoffset(new QGridLayout)
+    ,ConfigQFrame(new Frame_Config)
     ,LoadDialog(new LoadingDialog)
     //, MarkItem(new QGraphicsTextItem)
     //,m_ProgressD(new QProgressDialog)
@@ -32,17 +33,27 @@ Widget::Widget(QWidget *parent)
 
 {
     ui->setupUi(this);
+  //  this->setObjectName("数模解析软件");
+    this->setWindowTitle("数模解析软件");
     fileDialog->setWindowTitle("请选择文件");
     fileDialog->setDirectory("./");
     fileDialog->setNameFilter(tr("File(*.dxf* *.DXF*)"));
     fileDialog->setFileMode(QFileDialog::ExistingFiles);
     fileDialog->setViewMode(QFileDialog::Detail);
+  //  ConfigQFrame->setObjectName("配置");
+    ConfigQFrame->setWindowTitle("配置");
+    ConfigQFrame->setGeometry(this->geometry().center().x()/2,this->geometry().center().y()/2,300,300);
     ui->tw_AnalyzedData->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tw_AnalyzedData->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  //  ui->lab_x1  ->setReadOnly(1);
+  //  ui->lineEdit_2->setReadOnly(1);
+  //  ui->lineEdit_3->setReadOnly(1);
+   // ui->lineEdit_4->setReadOnly(1);
     scene->setBackgroundBrush(QBrush(QColor(255, 255, 255)));
     View->setInteractive(true);
-    View->setDragMode(QGraphicsView::ScrollHandDrag);
+  //  View->setDragMode(QGraphicsView::ScrollHandDrag);
     View->setScene(scene);
+
     View->setRenderHints(QPainter::SmoothPixmapTransform);
     hLayoutYOffset->addWidget(ui->PB_Load);
     hLayoutYOffset->addWidget(ui->pb_output);
@@ -53,27 +64,28 @@ Widget::Widget(QWidget *parent)
     gLayoutZoffset->setRowMinimumHeight(2,2);
 
     gLayoutZoffset->addWidget(ui->label);
-    gLayoutZoffset->addWidget(ui->lineEdit);
+    gLayoutZoffset->addWidget(ui->lab_x1);
     gLayoutZoffset->addWidget(ui->label_2);
-    gLayoutZoffset->addWidget(ui->lineEdit_2);
+    gLayoutZoffset->addWidget(ui->lab_y1);
     gLayoutZoffset->addWidget(ui->label_3);
-    gLayoutZoffset->addWidget(ui->lineEdit_3);
+    gLayoutZoffset->addWidget(ui->lab_x2);
     gLayoutZoffset->addWidget(ui->label_4);
-    gLayoutZoffset->addWidget(ui->lineEdit_4);
+    gLayoutZoffset->addWidget(ui->lab_y2);
     vLayoutParam->addLayout(gLayoutZoffset);
     hLayoutZoom->addWidget(View);
     hLayoutMain->addLayout(vLayoutParam);
     hLayoutMain->addLayout(hLayoutZoom);
     this->setLayout(hLayoutMain);
     tbRowCount=0;
-    DistanceOfPost=57.6;
-    sortDistance=1;
+   // DistanceOfPost=14.4;
+
     View->setTransform(QTransform().scale(1, -1));
    // m_ProgressD->reset();
    // m_ProgressD->setModal(1);
     connect(thread, SIGNAL(SendData(QList<DL_CircleData>, QList<DL_LineData> )),this,SLOT(DrawItem(QList<DL_CircleData> , QList<DL_LineData> )));
     connect(this ,SIGNAL( SendTable()),this, SLOT(ShowTable()));
     connect(this,SIGNAL(CloseLoadDialog()),this,SLOT(HideLoadDialog()));
+    connect(ui->pb_Config,SIGNAL(clicked()),ConfigQFrame,SLOT(show()));
 }
 
 Widget::~Widget()
@@ -108,12 +120,16 @@ void Widget::on_PB_Load_clicked()
     CircleData.clear();
     BatteryPostData.clear();
     BatteryList.clear();
+    SortedList.clear();
     CrosslineItem1=new QGraphicsLineItem();
     CrosslineItem2=new QGraphicsLineItem();
     MarkItem=new QGraphicsTextItem();
     MarkPosText=new QTextDocument();
+    sortDistance=ConfigQFrame->m_findAngle;
+    DistanceOfPost=ConfigQFrame->m_PostDistance.toDouble();
     QFuture<bool> analyFuture=QtConcurrent::run(&Widget::AnalyzeFile,this,FileNames.join("/"));
     LoadDialog->show();
+
 /*
   //  analyFuture.waitForFinished();
     //return ;
@@ -476,9 +492,14 @@ void Widget::on_PB_Load_clicked()
 void Widget::on_tw_AnalyzedData_itemDoubleClicked(QTableWidgetItem *item)
 {
 
-        qreal x= ui->tw_AnalyzedData->item(item->row(),0)->text().toDouble();
-        qreal y= ui->tw_AnalyzedData->item(item->row(),1)->text().toDouble();
-        qreal r= ui->tw_AnalyzedData->item(item->row(),2)->text().toDouble();
+        qreal x/*= ui->tw_AnalyzedData->item(item->row(),0)->text().toDouble()*/;
+        qreal y/*= ui->tw_AnalyzedData->item(item->row(),1)->text().toDouble()*/;
+        qreal r/*== ui->tw_AnalyzedData->item(item->row(),2)->text().toDouble()*/;
+        qreal s;
+        x= SortedList[ ui->tw_AnalyzedData->currentIndex().row()].GetCenterPoint().cx;
+        y=SortedList[ui->tw_AnalyzedData->currentIndex().row()].GetCenterPoint().cy;
+        r=SortedList[ui->tw_AnalyzedData->currentIndex().row()].GetCenterPoint().radius;
+        s=SortedList[ui->tw_AnalyzedData->currentIndex().row()].Scale;
         QPen pen;
         pen.setColor(Qt::red);
         pen.setWidth(3);
@@ -492,10 +513,13 @@ void Widget::on_tw_AnalyzedData_itemDoubleClicked(QTableWidgetItem *item)
         CrosslineItem2->setLine(line2);
 
 
-        MarkPosText->setPlainText(QString::asprintf("x:%9.3f\r\ny:%9.3f",x,y));
+        MarkPosText->setPlainText(QString::asprintf("x:%9.3f\r\ny:%9.3f",x*s,y*s));
         MarkItem->setDocument(MarkPosText);
-        MarkItem->setFont(QFont("Microsoft YaHei",80,50,1));
-
+        MarkItem->setFont(QFont("Microsoft YaHei",20,30,1));
+        ui->lab_x1->setText(QString::number(SortedList[ui->tw_AnalyzedData->currentIndex().row()].getTopScale().cx,'f',3));
+        ui->lab_y1->setText(QString::number(SortedList[ui->tw_AnalyzedData->currentIndex().row()].getTopScale().cy,'f',3));
+        ui->lab_x2->setText(QString::number(SortedList[ui->tw_AnalyzedData->currentIndex().row()].getBottomScale().cx,'f',3));
+        ui->lab_y2->setText(QString::number(SortedList[ui->tw_AnalyzedData->currentIndex().row()].getBottomScale().cy,'f',3));
         MarkItem->setPos(x,y);
         pen.setCosmetic(true);
         if(CrosslineFlag)
@@ -559,10 +583,12 @@ void Widget::DrawItem(QList<DL_CircleData> clist, QList<DL_LineData> llist)
         lineItem1->setPen(pen);
         lineItem2->setPen(pen);
         tt->setDefaultTextColor(Qt::black);
-        tt->setFont(QFont("Microsoft YaHei",80,50,1));
+        tt->setFont(QFont("Microsoft YaHei",20,30,1));
+       //  qDebug()<<"isFree?2";
         scene->addItem(tt);
         scene->addItem(lineItem1);
         scene->addItem(lineItem2);
+     //   qDebug()<<"isFree?1";
         View->update();
         emit CloseLoadDialog();
 }
@@ -572,14 +598,18 @@ void Widget::ShowTable()
         ui->tw_AnalyzedData->clear();
         ui->tw_AnalyzedData->setColumnCount(3);
         ui->tw_AnalyzedData->setRowCount(0);
+
+
          tbRowCount=0;
-        for (auto circle: BatteryPostData)
+        for (auto circle: SortedList)
         {
          tbRowCount= ui->tw_AnalyzedData->rowCount();
+         qreal s=circle.Scale;
          ui->tw_AnalyzedData->insertRow(tbRowCount);
-         ui->tw_AnalyzedData->setItem(tbRowCount,0,new QTableWidgetItem(QString::number(circle.cx)));
-         ui->tw_AnalyzedData->setItem(tbRowCount,1,new QTableWidgetItem(QString::number(circle.cy)));
-         ui->tw_AnalyzedData->setItem(tbRowCount,2,new QTableWidgetItem(QString::number(circle.radius)));
+         ui->tw_AnalyzedData->setItem(tbRowCount,0,new QTableWidgetItem(QString::number(circle.GetCenterPoint().cx*s)));
+         ui->tw_AnalyzedData->setItem(tbRowCount,1,new QTableWidgetItem(QString::number(circle.GetCenterPoint().cy*s)));
+         ui->tw_AnalyzedData->setItem(tbRowCount,2,new QTableWidgetItem(QString::number(circle.GetCenterPoint().radius*s)));
+
          //ui->tw_AnalyzedData->setItem(tbRowCount,3 new QTableWidgetItem)
         }
 emit CloseLoadDialog();
@@ -720,7 +750,7 @@ bool Widget::AnalyzeFile(QString FileNames)
         bm.Bottom.cy=QString::number(CircleData[j].cy,'f',3).toDouble();
         bm.Bottom.radius=QString::number(CircleData[j].radius,'f',3).toDouble();
         bm.Scale=scale;
-        bm.Angel=0;
+        bm.Angle=0;
         bm.TopNumb=i;
         bm.BottomNumb=j;
 
@@ -739,7 +769,7 @@ bool Widget::AnalyzeFile(QString FileNames)
         bm.Bottom.cy=QString::number(CircleData[i].cy,'f',3).toDouble();
         bm.Bottom.radius=QString::number(CircleData[i].radius,'f',3).toDouble();
          bm.Scale=scale;
-        bm.Angel=0;
+        bm.Angle=0;
         bm.TopNumb=j;
         bm.BottomNumb=i;
         BatteryList.push_back(bm);
@@ -757,7 +787,7 @@ bool Widget::AnalyzeFile(QString FileNames)
         bm.Bottom.cy=QString::number(CircleData[j].cy,'f',3).toDouble();
         bm.Bottom.radius=QString::number(CircleData[j].radius,'f',3).toDouble();
         bm.Scale=scale;
-        bm.Angel=90;
+        bm.Angle=90;
         bm.TopNumb=i;
         bm.BottomNumb=j;
         BatteryList.push_back(bm);
@@ -775,7 +805,7 @@ bool Widget::AnalyzeFile(QString FileNames)
         bm.Bottom.cy=QString::number(CircleData[i].cy,'f',3).toDouble();
         bm.Bottom.radius=QString::number(CircleData[j].radius).toDouble();
         bm.Scale=scale;
-        bm.Angel=90;
+        bm.Angle=90;
         bm.TopNumb=j;
         bm.BottomNumb=i;
         BatteryList.push_back(bm);
@@ -787,7 +817,7 @@ bool Widget::AnalyzeFile(QString FileNames)
          }
         }
         QMap<double,QList<BatteryMark>> row;
-       srow.clear();
+        QMap<int,QList<BatteryMark>> srow;
         //  bool filter=false;
         //  QList<double> index;
         if(sortDistance)
@@ -924,9 +954,10 @@ bool Widget::AnalyzeFile(QString FileNames)
         {
          for (int i = 0; i < d.count(); i++)
          {
-             DL_CircleData top(d[i].GetCenterPoint().cx,d[i].GetCenterPoint().cy,0,d[i].GetCenterPoint().radius);
 
-             BatteryPostData<<top;
+             //BatteryMark temp;
+
+             SortedList<<d[i];
 //             DL_CircleData Bottom(d[i].Bottom.cx,d[i].Bottom.cy,0,d[i].Bottom.radius);
 //             BatteryPostData<<Bottom;
          }
