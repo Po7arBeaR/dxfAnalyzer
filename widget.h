@@ -12,6 +12,7 @@
 #include <QVBoxLayout>
 #include <QTableWidgetItem>
 #include <QProgressDialog>
+#include <QTabWidget>
 #include "readerprogressdialog.h"
 #include "interactiveview.h"
 #include "loadingdialog.h"
@@ -40,9 +41,12 @@ private slots:
 
     void on_tw_AnalyzedData_itemDoubleClicked(QTableWidgetItem *item);
 
+    void on_pb_output_clicked();
+
 private:
     Ui::Widget *ui;
     QFileDialog *fileDialog ;
+    QFileDialog *outPutDialog;
     QGraphicsScene *scene;
     InteractiveView* View;
     QHBoxLayout* hLayoutXCenter;
@@ -54,6 +58,8 @@ private:
     QHBoxLayout *hLayoutMain;
     QGridLayout *gLayoutZoffset;
     Frame_Config* ConfigQFrame;
+    QTabWidget* TW_LeftParam;
+    QTableWidget* tw_MarkParam;
 private:
     QList<DL_LineData> LinesData;
     QList<DL_CircleData> CircleData;
@@ -73,6 +79,7 @@ private:
     QTextDocument *MarkPosText;
     LoadingDialog * LoadDialog;
     QList<BatteryMark> SortedList;
+    QList<DL_CircleData> MarkList;
 //    qreal BasePointx;
 //    qreal BasePointy;
    // QProgressDialog* m_ProgressD;
@@ -80,16 +87,19 @@ private:
 public slots:
     void DrawItem(QList<DL_CircleData> clist,QList<DL_LineData> llist);
     void ShowTable();
+    void ShowMark();
     void HideLoadDialog();
 signals:
-     void SendTable();
-     void CloseLoadDialog();
+    void SendTable();
+    void SendMark();
+    void CloseLoadDialog();
 private:
     asyncThread * thread;
 
 public:
     bool AnalyzeFile(QString FileNames);
     bool CircleFilter( QList<DL_CircleData>);
+    bool MarkFilter(QList<DL_CircleData>);
     bool InitBuffer();
 };
 

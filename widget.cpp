@@ -13,12 +13,15 @@
 #include <QtConcurrent>
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
-    , ui(new Ui::Widget)
-    , fileDialog(new QFileDialog )   
+    ,ui(new Ui::Widget)
+    ,fileDialog(new QFileDialog )
+    ,outPutDialog(new QFileDialog)
     ,scene(new QGraphicsScene)
     ,View(new InteractiveView)
-    , hLayoutXCenter(new QHBoxLayout)
-    , hLayoutYCenter(new QHBoxLayout)
+    ,TW_LeftParam(new QTabWidget)
+    ,tw_MarkParam(new QTableWidget)
+    ,hLayoutXCenter(new QHBoxLayout)
+    ,hLayoutYCenter(new QHBoxLayout)
     ,hLayoutXOffset(new QHBoxLayout)
     ,hLayoutYOffset(new QHBoxLayout)
     ,hLayoutZoom(new QHBoxLayout)
@@ -40,11 +43,21 @@ Widget::Widget(QWidget *parent)
     fileDialog->setNameFilter(tr("File(*.dxf* *.DXF*)"));
     fileDialog->setFileMode(QFileDialog::ExistingFiles);
     fileDialog->setViewMode(QFileDialog::Detail);
+
+//    outPutDialog->setWindowTitle("请选择文件夹");
+//    outPutDialog->setDirectory("./");
+    outPutDialog->setNameFilter(tr("File(*.csv* *.CSV*)"));
+    outPutDialog->setFileMode(QFileDialog::ExistingFiles);
+    outPutDialog->setViewMode(QFileDialog::Detail);
   //  ConfigQFrame->setObjectName("配置");
     ConfigQFrame->setWindowTitle("配置");
     ConfigQFrame->setGeometry(this->geometry().center().x()/2,this->geometry().center().y()/2,300,300);
     ui->tw_AnalyzedData->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tw_AnalyzedData->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    tw_MarkParam->setSelectionBehavior(QAbstractItemView::SelectRows);
+    tw_MarkParam->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    TW_LeftParam->insertTab(0,ui->tw_AnalyzedData,tr("极柱"));
+    TW_LeftParam->insertTab(1,tw_MarkParam,tr("MARK点"));
   //  ui->lab_x1  ->setReadOnly(1);
   //  ui->lineEdit_2->setReadOnly(1);
   //  ui->lineEdit_3->setReadOnly(1);
@@ -59,7 +72,7 @@ Widget::Widget(QWidget *parent)
     hLayoutYOffset->addWidget(ui->pb_output);
     hLayoutYOffset->addWidget(ui->pb_Config);
     vLayoutParam->addLayout(hLayoutYOffset);
-    vLayoutParam->addWidget(ui->tw_AnalyzedData);
+    vLayoutParam->addWidget(TW_LeftParam);
     gLayoutZoffset->setColumnMinimumWidth(1,1);
     gLayoutZoffset->setRowMinimumHeight(2,2);
 
@@ -86,12 +99,14 @@ Widget::Widget(QWidget *parent)
     connect(this ,SIGNAL( SendTable()),this, SLOT(ShowTable()));
     connect(this,SIGNAL(CloseLoadDialog()),this,SLOT(HideLoadDialog()));
     connect(ui->pb_Config,SIGNAL(clicked()),ConfigQFrame,SLOT(show()));
+
 }
 
 Widget::~Widget()
 {
     delete ui;
     delete fileDialog;
+    delete outPutDialog;
     delete scene;
     delete View;
    // delete MarkPosText;
@@ -483,12 +498,6 @@ void Widget::on_PB_Load_clicked()
 
 }
 
-
-
-
-
-
-
 void Widget::on_tw_AnalyzedData_itemDoubleClicked(QTableWidgetItem *item)
 {
 
@@ -612,13 +621,23 @@ void Widget::ShowTable()
 
          //ui->tw_AnalyzedData->setItem(tbRowCount,3 new QTableWidgetItem)
         }
-emit CloseLoadDialog();
+        emit CloseLoadDialog();
+}
+
+void Widget::ShowMark()
+{
+        tw_MarkParam->clear();
+        tw_MarkParam->setColumnCount(3);
+        tw_MarkParam->setRowCount(0);
+        int RowCount=0;
+
+        emit CloseLoadDialog();
 }
 
 void Widget::HideLoadDialog()
 {
         LoadDialogCount++;
-        if(LoadDialogCount>=2)
+        if(LoadDialogCount>=3)
         {
          LoadDialogCount=0;
          LoadDialog->hide();
@@ -638,6 +657,7 @@ bool Widget::AnalyzeFile(QString FileNames)
         //   bool  badState = input->fileImport( FileNames.join("/").toStdString(), &fData );
         //  QPen pen;
         QFuture<bool> Filterfuture=   QtConcurrent::run(&Widget::CircleFilter,this,dxfreader.dxfCircle);
+
         CrosslineFlag=true;
         // pen.setColor(Qt::black);
         //  pen.setWidth(0);
@@ -657,6 +677,7 @@ bool Widget::AnalyzeFile(QString FileNames)
          }
         }
         if(f.isOpen())f.close();
+         QFuture<bool> FilterMarkPoint=QtConcurrent::run(&Widget::MarkFilter,this,dxfreader.dxfCircle);
       //  qDebug()<<"scale is:"<<scale;
         thread->m_Llist.clear();
         thread->m_clist.clear();
@@ -1005,6 +1026,20 @@ bool Widget::CircleFilter( QList<DL_CircleData> dxfCircle)
         return 1;
 }
 
+bool Widget::MarkFilter(QList<DL_CircleData> dxfCircle)
+{
+        for(auto circle:dxfCircle)
+        {
+         if(circle.radius==ConfigQFrame->m_markRadius.toDouble())
+         {
+
+             MarkList<<circle;
+         }
+        // MarkList
+        }
+        return 1;
+}
+
 bool Widget::InitBuffer()
 {
         qDebug()<<"into"<<__FUNCTION__<<"\r\n";
@@ -1026,10 +1061,29 @@ bool Widget::InitBuffer()
 //        emit ShowSig();
 //}
 
+void Widget::on_pb_output_clicked()
+{
+        QString Directory= outPutDialog->getExistingDirectory(this,"选择目录","./",QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks);
+        if(Directory=="")
+        {
+         return ;
+        }
+       // qDebug()<<Directory;
+        QFile outFile(Directory+"/1.csv");
+        if(outFile.open(QIODevice::WriteOnly))
+        {
+         for(auto circle: SortedList)
+         {
+             QString str;
+             str=QString::number(circle.getTopScale().cx)+","+
+                 QString::number(circle.getTopScale().cy)+","+
+                 QString::number(circle.getBottomScale().cx)+","+
+                 QString::number(circle.getBottomScale().cy)+"\n";
+             outFile.write(str.toStdString().c_str());
 
+         }
 
-
-
-
-
+        }
+        outFile.close();
+}
 
