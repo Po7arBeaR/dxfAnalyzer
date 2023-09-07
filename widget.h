@@ -74,9 +74,11 @@ private:
     int RowCount;
     bool CrosslineFlag;
     bool MarkCrosslineFlag;
+
     qreal scale;//缩放
     qreal DistanceOfPost;//极柱
     bool sortDistance;
+    QString FileName;
     QGraphicsLineItem *CrosslineItem1;
     QGraphicsLineItem *CrosslineItem2;
     QGraphicsLineItem *MarkCrossLineItem1;//

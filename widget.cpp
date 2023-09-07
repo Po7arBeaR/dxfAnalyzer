@@ -11,6 +11,7 @@
 #include <QTextDocument>
 #include <QFuture>
 #include <QtConcurrent>
+#include <QMessageBox>
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     ,ui(new Ui::Widget)
@@ -125,17 +126,33 @@ Widget::~Widget()
 void Widget::on_PB_Load_clicked()
 {
   //  ProgDialog->setVisible(0);
-    QStringList FileNames;
-    FileNames.clear();
+    QStringList FilePath;
+    FilePath.clear();
     if(fileDialog->exec())
     {
-        FileNames=fileDialog->selectedFiles();
+        FilePath=fileDialog->selectedFiles();
        // if(FileNames.count()<=0)return;
     }
     else
     {
         return;
     }
+
+    if(FilePath.join("").endsWith(".dxf")||FilePath.join("").endsWith(".DXF"))
+    {
+
+
+    }
+    else
+    {
+        QMessageBox msg;
+        msg.setText("无效的文件类型");
+        msg.exec();
+        return ;
+    }
+   int filenameIndex= FilePath.join("").lastIndexOf("/");
+    FileName=FilePath.join("").mid(filenameIndex+1,FilePath.join("").length()-filenameIndex-5);
+   //qDebug()<<FilePath.join("").length()-4<< " "<<FilePath.join("").length();
     LoadDialogCount=0;
 //    scene->clear();
     CircleData.clear();
@@ -154,7 +171,7 @@ void Widget::on_PB_Load_clicked()
     MarkPointPosText=new  QTextDocument();
     sortDistance=ConfigQFrame->m_findAngle;
     DistanceOfPost=ConfigQFrame->m_PostDistance.toDouble();
-    QFuture<bool> analyFuture=QtConcurrent::run(&Widget::AnalyzeFile,this,FileNames.join("/"));
+    QFuture<bool> analyFuture=QtConcurrent::run(&Widget::AnalyzeFile,this,FilePath.join("/"));
     LoadDialog->show();
 
 /*
@@ -1109,7 +1126,7 @@ void Widget::on_pb_output_clicked()
          return ;
         }
        // qDebug()<<Directory;
-        QFile outFile(Directory+"/1.csv");
+        QFile outFile(Directory+"/"+FileName+".csv");
 
         if(outFile.open(QIODevice::WriteOnly))
         {
