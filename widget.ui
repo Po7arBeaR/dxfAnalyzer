@@ -166,6 +166,16 @@
     <string/>
    </property>
   </widget>
+  <widget class="QTableWidget" name="tw_MarkPointData">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>30</y>
+     <width>256</width>
+     <height>521</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

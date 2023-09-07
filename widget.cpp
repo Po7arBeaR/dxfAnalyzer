@@ -19,7 +19,7 @@ Widget::Widget(QWidget *parent)
     ,scene(new QGraphicsScene)
     ,View(new InteractiveView)
     ,TW_LeftParam(new QTabWidget)
-    ,tw_MarkParam(new QTableWidget)
+   // ,tw_MarkParam(new QTableWidget(this))
     ,hLayoutXCenter(new QHBoxLayout)
     ,hLayoutYCenter(new QHBoxLayout)
     ,hLayoutXOffset(new QHBoxLayout)
@@ -54,10 +54,14 @@ Widget::Widget(QWidget *parent)
     ConfigQFrame->setGeometry(this->geometry().center().x()/2,this->geometry().center().y()/2,300,300);
     ui->tw_AnalyzedData->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tw_AnalyzedData->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    tw_MarkParam->setSelectionBehavior(QAbstractItemView::SelectRows);
-    tw_MarkParam->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tw_AnalyzedData->horizontalHeader()->resizeSections(QHeaderView::Stretch);
+
+    ui->tw_MarkPointData->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tw_MarkPointData->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tw_MarkPointData->horizontalHeader()->resizeSections(QHeaderView::Stretch);
+
     TW_LeftParam->insertTab(0,ui->tw_AnalyzedData,tr("极柱"));
-    TW_LeftParam->insertTab(1,tw_MarkParam,tr("MARK点"));
+    TW_LeftParam->insertTab(1,ui->tw_MarkPointData,tr("MARK点"));
   //  ui->lab_x1  ->setReadOnly(1);
   //  ui->lineEdit_2->setReadOnly(1);
   //  ui->lineEdit_3->setReadOnly(1);
@@ -91,12 +95,14 @@ Widget::Widget(QWidget *parent)
     this->setLayout(hLayoutMain);
     tbRowCount=0;
    // DistanceOfPost=14.4;
+    ui->tw_MarkPointData->clear();
 
     View->setTransform(QTransform().scale(1, -1));
    // m_ProgressD->reset();
    // m_ProgressD->setModal(1);
     connect(thread, SIGNAL(SendData(QList<DL_CircleData>, QList<DL_LineData> )),this,SLOT(DrawItem(QList<DL_CircleData> , QList<DL_LineData> )));
     connect(this ,SIGNAL( SendTable()),this, SLOT(ShowTable()));
+    connect(this,SIGNAL(SendMark()),this,SLOT(ShowMark()));
     connect(this,SIGNAL(CloseLoadDialog()),this,SLOT(HideLoadDialog()));
     connect(ui->pb_Config,SIGNAL(clicked()),ConfigQFrame,SLOT(show()));
 
@@ -109,7 +115,7 @@ Widget::~Widget()
     delete outPutDialog;
     delete scene;
     delete View;
-   // delete MarkPosText;
+    //delete MarkPosText;
     //delete CrosslineItem1;
     //delete CrosslineItem2;
 }
@@ -136,10 +142,16 @@ void Widget::on_PB_Load_clicked()
     BatteryPostData.clear();
     BatteryList.clear();
     SortedList.clear();
+    MarkList.clear();
+     ui->tw_MarkPointData->setRowCount(0);
     CrosslineItem1=new QGraphicsLineItem();
     CrosslineItem2=new QGraphicsLineItem();
+    MarkCrossLineItem1=new QGraphicsLineItem();
+    MarkCrossLineItem2=new QGraphicsLineItem();
+    MarkPointItem=new QGraphicsTextItem();
     MarkItem=new QGraphicsTextItem();
     MarkPosText=new QTextDocument();
+    MarkPointPosText=new  QTextDocument();
     sortDistance=ConfigQFrame->m_findAngle;
     DistanceOfPost=ConfigQFrame->m_PostDistance.toDouble();
     QFuture<bool> analyFuture=QtConcurrent::run(&Widget::AnalyzeFile,this,FileNames.join("/"));
@@ -617,7 +629,9 @@ void Widget::ShowTable()
          ui->tw_AnalyzedData->insertRow(tbRowCount);
          ui->tw_AnalyzedData->setItem(tbRowCount,0,new QTableWidgetItem(QString::number(circle.GetCenterPoint().cx*s)));
          ui->tw_AnalyzedData->setItem(tbRowCount,1,new QTableWidgetItem(QString::number(circle.GetCenterPoint().cy*s)));
-         ui->tw_AnalyzedData->setItem(tbRowCount,2,new QTableWidgetItem(QString::number(circle.GetCenterPoint().radius*s)));
+         QTableWidgetItem *checkBox = new QTableWidgetItem();
+         checkBox->setCheckState(Qt::Checked);
+         ui->tw_AnalyzedData->setItem(tbRowCount,2,checkBox);
 
          //ui->tw_AnalyzedData->setItem(tbRowCount,3 new QTableWidgetItem)
         }
@@ -626,11 +640,28 @@ void Widget::ShowTable()
 
 void Widget::ShowMark()
 {
-        tw_MarkParam->clear();
-        tw_MarkParam->setColumnCount(3);
-        tw_MarkParam->setRowCount(0);
-        int RowCount=0;
+        ui->tw_MarkPointData->clear();
+        ui->tw_MarkPointData->setColumnCount(3);
+        ui->tw_MarkPointData->setRowCount(0);
+        RowCount=0;
+        for(auto circle:MarkList)
+        {
+           RowCount=ui->tw_MarkPointData->rowCount() ;
 
+         //  qDebug()<<RowCount;
+           ui->tw_MarkPointData->insertRow(RowCount);
+          // ui->tw_MarkPointData->removeRow(RowCount - 1);
+           ui->tw_MarkPointData->setItem(RowCount,0,new QTableWidgetItem(QString::number(circle.getScaleMarkPoint().cx)));
+           ui->tw_MarkPointData->setItem(RowCount,1 ,new QTableWidgetItem(QString::number(circle.getScaleMarkPoint().cy)));
+           QTableWidgetItem *checkBox = new QTableWidgetItem();
+           checkBox->setCheckState(Qt::Unchecked);
+           ui->tw_MarkPointData->setItem(RowCount,2,checkBox);
+        //    thread->msleep(100);
+        //   ui->tw_MarkPointData->setItem(RowCount,2,new QTableWidgetItem(QString::number(circle.getScaleMarkPoint().radius)));
+        }
+       // ui->tw_MarkPointData->setRowCount(ui->tw_MarkPointData->rowCount());
+    //    qDebug()<<"columnCount:"<<ui->tw_MarkPointData->columnCount()<<"rowCount:"<<ui->tw_MarkPointData->rowCount();
+   //     qDebug()<<RowCount;
         emit CloseLoadDialog();
 }
 
@@ -659,6 +690,7 @@ bool Widget::AnalyzeFile(QString FileNames)
         QFuture<bool> Filterfuture=   QtConcurrent::run(&Widget::CircleFilter,this,dxfreader.dxfCircle);
 
         CrosslineFlag=true;
+        MarkCrosslineFlag=true;
         // pen.setColor(Qt::black);
         //  pen.setWidth(0);
         QFile f(FileNames);
@@ -677,7 +709,7 @@ bool Widget::AnalyzeFile(QString FileNames)
          }
         }
         if(f.isOpen())f.close();
-         QFuture<bool> FilterMarkPoint=QtConcurrent::run(&Widget::MarkFilter,this,dxfreader.dxfCircle);
+         QFuture<bool> FilterMarkPoint=QtConcurrent::run(&Widget::MarkFilter,this,dxfreader.dxfCircle,scale);
       //  qDebug()<<"scale is:"<<scale;
         thread->m_Llist.clear();
         thread->m_clist.clear();
@@ -779,8 +811,8 @@ bool Widget::AnalyzeFile(QString FileNames)
         Connected<<j;
         continue;
              }
-             if(QString::number(CircleData[i].cx,'f',2)==QString::number(CircleData[j].cx,'f',2)&&
-                 QString::number(CircleData[i].cy- DistanceOfPost,'f',2)==QString::number(CircleData[j].cy,'f',2))
+             if(QString::number(CircleData[i].cx,'f',3)==QString::number(CircleData[j].cx,'f',3)&&
+                 QString::number(CircleData[i].cy- DistanceOfPost,'f',3)==QString::number(CircleData[j].cy,'f',3))
              {
         BatteryMark bm;
         bm.Top.cx=QString::number(CircleData[j].cx,'f',3).toDouble();
@@ -797,8 +829,8 @@ bool Widget::AnalyzeFile(QString FileNames)
         Connected<<j;
         continue;
              }
-             if(QString::number(CircleData[i].cx+ DistanceOfPost,'f',2)==QString::number(CircleData[j].cx,'f',2)&&
-                 QString::number(CircleData[i].cy,'f',2)==QString::number(CircleData[j].cy,'f',2))
+             if(QString::number(CircleData[i].cx+ DistanceOfPost,'f',3)==QString::number(CircleData[j].cx,'f',3)&&
+                 QString::number(CircleData[i].cy,'f',3)==QString::number(CircleData[j].cy,'f',3))
              {
         BatteryMark bm;
         bm.Top.cx=QString::number(CircleData[i].cx,'f',3).toDouble();
@@ -815,8 +847,8 @@ bool Widget::AnalyzeFile(QString FileNames)
         Connected<<j;
         continue;
              }
-             if(QString::number(CircleData[i].cx- DistanceOfPost,'f',2)==QString::number(CircleData[j].cx,'f',2)&&
-                 QString::number(CircleData[i].cy,'f',2)==QString::number(CircleData[j].cy,'f',2))
+             if(QString::number(CircleData[i].cx- DistanceOfPost,'f',3)==QString::number(CircleData[j].cx,'f',3)&&
+                 QString::number(CircleData[i].cy,'f',3)==QString::number(CircleData[j].cy,'f',3))
              {
         BatteryMark bm;
         bm.Top.cx=QString::number(CircleData[j].cx,'f',3).toDouble();
@@ -986,6 +1018,9 @@ bool Widget::AnalyzeFile(QString FileNames)
 
 
         emit SendTable();
+        FilterMarkPoint.waitForFinished();
+        emit SendMark();
+      //  QtConcurrent::run(&Widget::ShowMark,this);
         auto d=thread->m_clist.at(0);
 
         View->centerOn(d.cx,d.cy);
@@ -1002,7 +1037,7 @@ bool Widget::CircleFilter( QList<DL_CircleData> dxfCircle)
          //  QList<DL_CircleData> filter;
          for (auto circle :  CircleData)
          {
-             if((QString::number(circle.cx,'f',2)==QString::number(db.cx,'f',2))&&(QString::number(circle.cy,'f',2)==QString::number(db.cy,'f',2)))
+             if((QString::number(circle.cx,'f',3)==QString::number(db.cx,'f',3))&&(QString::number(circle.cy,'f',3)==QString::number(db.cy,'f',3)))
              {
         repeated=true;
         break;
@@ -1026,17 +1061,22 @@ bool Widget::CircleFilter( QList<DL_CircleData> dxfCircle)
         return 1;
 }
 
-bool Widget::MarkFilter(QList<DL_CircleData> dxfCircle)
+bool Widget::MarkFilter(QList<DL_CircleData>dxfCircle, qreal scale)
 {
         for(auto circle:dxfCircle)
         {
-         if(circle.radius==ConfigQFrame->m_markRadius.toDouble())
+         if(QString::number(circle.radius,'f',2).toDouble()*scale==ConfigQFrame->m_markRadius.toDouble())
          {
-
-             MarkList<<circle;
+             MarkPointType markpoint;
+             markpoint.MarkPoint.cx=circle.cx;
+             markpoint.MarkPoint.cy=circle.cy;
+             markpoint.MarkPoint.radius=circle.radius;
+             markpoint.scale=scale;
+             MarkList<<markpoint;
          }
-        // MarkList
+         // MarkList
         }
+       // qDebug()<<MarkList.count();
         return 1;
 }
 
@@ -1070,20 +1110,88 @@ void Widget::on_pb_output_clicked()
         }
        // qDebug()<<Directory;
         QFile outFile(Directory+"/1.csv");
+
         if(outFile.open(QIODevice::WriteOnly))
         {
-         for(auto circle: SortedList)
+             outFile.write(QString("ID,X,Y,Angle,x1,y1,x2,y2\r\n").toStdString().c_str());
+         for(int i =0 ; i<MarkList.count();i++)
          {
+             if(ui->tw_MarkPointData->item(i,2)->checkState()==Qt::Checked)
+             {
              QString str;
-             str=QString::number(circle.getTopScale().cx)+","+
-                 QString::number(circle.getTopScale().cy)+","+
-                 QString::number(circle.getBottomScale().cx)+","+
-                 QString::number(circle.getBottomScale().cy)+"\n";
+        str="MarkPoint,"+
+             QString::number(MarkList[i].getScaleMarkPoint().cx)+","+
+             QString::number(MarkList[i].getScaleMarkPoint().cy)+"\r\n";
              outFile.write(str.toStdString().c_str());
+             }
+
+         }
+        // outFile.write("\n");
+         for(int i =0 ; i<SortedList.count();i++)
+         {
+             if(ui->tw_AnalyzedData->item(i,2)->checkState()==Qt::Checked)
+             {
+             QString str;
+             str=QString::number(i+1)+","+
+                   QString::number(SortedList[i].GetCenterPoint().cx)+","+
+                   QString::number(SortedList[i].GetCenterPoint().cy)+","+
+                   QString::number(SortedList[i].Angle)+","+
+                   QString::number(SortedList[i].getTopScale().cx)+","+
+                   QString::number(SortedList[i].getTopScale().cy)+","+
+                   QString::number(SortedList[i].getBottomScale().cx)+","+
+                   QString::number(SortedList[i].getBottomScale().cy)+"\r\n";
+             outFile.write(str.toStdString().c_str());
+             }
+
 
          }
 
         }
         outFile.close();
+        qDebug()<<"outputDone";
+}
+
+
+void Widget::on_tw_MarkPointData_itemDoubleClicked(QTableWidgetItem *item)
+{
+        qreal x/*= ui->tw_AnalyzedData->item(item->row(),0)->text().toDouble()*/;
+        qreal y/*= ui->tw_AnalyzedData->item(item->row(),1)->text().toDouble()*/;
+        qreal r/*== ui->tw_AnalyzedData->item(item->row(),2)->text().toDouble()*/;
+        qreal s;
+        x= MarkList[ ui->tw_MarkPointData->currentIndex().row()].MarkPoint.cx;
+        y=MarkList[ui->tw_MarkPointData->currentIndex().row()].MarkPoint.cy;
+        r=MarkList[ui->tw_MarkPointData->currentIndex().row()].MarkPoint.radius;
+        s=MarkList[ui->tw_MarkPointData->currentIndex().row()].scale;
+        QPen pen;
+        pen.setColor(QColorConstants::Svg::purple);
+        pen.setWidth(3);
+         qDebug()<<r;
+        r=r*10;
+        QLineF line1(x,y+r,x,y-r);
+        QLineF line2(x+r,y,x-r,y);
+
+        // QGraphicsLineItem *lineItem1 = new QGraphicsLineItem(line1);
+        //  QGraphicsLineItem *lineItem2 = new QGraphicsLineItem(line2);
+        MarkCrossLineItem1->setLine(line1);
+        MarkCrossLineItem2->setLine(line2);
+
+
+        MarkPointPosText->setPlainText(QString::asprintf("x:%9.3f\r\ny:%9.3f",x*s,y*s));
+        MarkPointItem->setDocument(MarkPointPosText);
+        MarkPointItem->setFont(QFont("Microsoft YaHei",20,30,1));
+        MarkPointItem->setPos(x,y);
+        pen.setCosmetic(true);
+        if(MarkCrosslineFlag)
+        {
+         MarkCrosslineFlag=false;
+         MarkCrossLineItem1->setPen(pen);
+         MarkPointItem->setDefaultTextColor(QColorConstants::Svg::skyblue);
+         // MarkItem->setTextWidth(20);
+         MarkPointItem->setTransform(QTransform().scale(1,-1));
+         MarkCrossLineItem2->setPen(pen);
+         scene->addItem(MarkCrossLineItem1);
+         scene->addItem(MarkCrossLineItem2);
+         scene->addItem(MarkPointItem);
+        }
 }
 

@@ -19,6 +19,7 @@
 #include "findpost.h"
 #include "asyncthread.h"
 #include "frame_config.h"
+#include "markpointtype.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
 QT_END_NAMESPACE
@@ -43,6 +44,8 @@ private slots:
 
     void on_pb_output_clicked();
 
+    void on_tw_MarkPointData_itemDoubleClicked(QTableWidgetItem *item);
+
 private:
     Ui::Widget *ui;
     QFileDialog *fileDialog ;
@@ -59,7 +62,7 @@ private:
     QGridLayout *gLayoutZoffset;
     Frame_Config* ConfigQFrame;
     QTabWidget* TW_LeftParam;
-    QTableWidget* tw_MarkParam;
+   // QTableWidget* tw_MarkParam;
 private:
     QList<DL_LineData> LinesData;
     QList<DL_CircleData> CircleData;
@@ -68,18 +71,24 @@ private:
     QList<DL_CircleData> BatteryPostData;
     QList<DL_CircleData> AllCircleData;
     int tbRowCount;
+    int RowCount;
     bool CrosslineFlag;
+    bool MarkCrosslineFlag;
     qreal scale;//缩放
     qreal DistanceOfPost;//极柱
     bool sortDistance;
     QGraphicsLineItem *CrosslineItem1;
-    QGraphicsLineItem *CrosslineItem2 ;
+    QGraphicsLineItem *CrosslineItem2;
+    QGraphicsLineItem *MarkCrossLineItem1;//
+    QGraphicsLineItem *MarkCrossLineItem2;//
     QGraphicsTextItem *MarkItem;
+    QGraphicsTextItem *MarkPointItem;//
     QList<BatteryMark> BatteryList;
     QTextDocument *MarkPosText;
+    QTextDocument *MarkPointPosText;//
     LoadingDialog * LoadDialog;
     QList<BatteryMark> SortedList;
-    QList<DL_CircleData> MarkList;
+    QList<MarkPointType> MarkList;
 //    qreal BasePointx;
 //    qreal BasePointy;
    // QProgressDialog* m_ProgressD;
@@ -89,6 +98,7 @@ public slots:
     void ShowTable();
     void ShowMark();
     void HideLoadDialog();
+ //   void on_tw_MarkParam_DoubleClick();
 signals:
     void SendTable();
     void SendMark();
@@ -99,7 +109,7 @@ private:
 public:
     bool AnalyzeFile(QString FileNames);
     bool CircleFilter( QList<DL_CircleData>);
-    bool MarkFilter(QList<DL_CircleData>);
+    bool MarkFilter(QList<DL_CircleData> ,qreal);
     bool InitBuffer();
 };
 

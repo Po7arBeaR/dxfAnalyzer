@@ -34,6 +34,7 @@ public:
     QLabel *lab_x2;
     QLabel *lab_y1;
     QLabel *lab_y2;
+    QTableWidget *tw_MarkPointData;
 
     void setupUi(QWidget *Widget)
     {
@@ -76,6 +77,9 @@ public:
         lab_y2 = new QLabel(Widget);
         lab_y2->setObjectName("lab_y2");
         lab_y2->setGeometry(QRect(150, 590, 81, 16));
+        tw_MarkPointData = new QTableWidget(Widget);
+        tw_MarkPointData->setObjectName("tw_MarkPointData");
+        tw_MarkPointData->setGeometry(QRect(230, 30, 256, 521));
 
         retranslateUi(Widget);
 

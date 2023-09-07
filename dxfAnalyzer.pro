@@ -18,6 +18,7 @@ SOURCES += \
     interactiveview.cpp \
     loadingdialog.cpp \
     main.cpp \
+    markpointtype.cpp \
     widget.cpp
 
 HEADERS += \
@@ -27,6 +28,7 @@ HEADERS += \
     frame_config.h \
     interactiveview.h \
     loadingdialog.h \
+    markpointtype.h \
     widget.h\
     dxflib/dl_attributes.h \
     dxflib/dl_codes.h \
