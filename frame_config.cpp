@@ -104,5 +104,6 @@ void Frame_Config::SaveChange()
     }
     LE_PostDistance->setText(m_PostDistance);
     LE_markRadius->setText(m_markRadius);
+    this->close();
 }
 

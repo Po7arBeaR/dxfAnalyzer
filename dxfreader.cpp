@@ -8,7 +8,7 @@ dxfReader::dxfReader(const QString &fileName, QObject *parent)
 {
     DL_Dxf *dxf = new DL_Dxf;
 
-    if (!dxf->in(fileName.toStdString().c_str(), this)) { // if file open failed
+    if (!dxf->in(fileName.toLocal8Bit().data(), this)) { // if file open failed
         std::cerr << fileName.toStdString() << " could not be opened.\n";
         return;
     }

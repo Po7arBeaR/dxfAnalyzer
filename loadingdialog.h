@@ -13,8 +13,7 @@ class LoadingDialog : public QDialog
 public:
     explicit LoadingDialog(QWidget *parent = nullptr);
     ~LoadingDialog();
-    //设置提示文本
-    void setTipsText(QString strTipsText);
+
     //设置是否显示取消等待按钮
     void setCanCancel(bool bCanCancel);
     //移动到指定窗口中间显示
@@ -27,6 +26,9 @@ Q_SIGNALS:
     void cancelWaiting();
 private slots:
     void cancelBtnClicked();
+public slots:
+    //设置提示文本
+    void setTipsText(QString strTipsText);
 private:
     QFrame *m_pCenterFrame;
     QLabel *m_pMovieLabel;

@@ -105,6 +105,8 @@ signals:
     void SendTable();
     void SendMark();
     void CloseLoadDialog();
+    void SendTips(QString str);
+   // int (*het)(int ,int);
 private:
     asyncThread * thread;
 

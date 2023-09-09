@@ -51,16 +51,19 @@ Widget::Widget(QWidget *parent)
     outPutDialog->setFileMode(QFileDialog::ExistingFiles);
     outPutDialog->setViewMode(QFileDialog::Detail);
   //  ConfigQFrame->setObjectName("配置");
+    ConfigQFrame->setWindowModality(Qt::ApplicationModal);
     ConfigQFrame->setWindowTitle("配置");
     ConfigQFrame->setGeometry(this->geometry().center().x()/2,this->geometry().center().y()/2,300,300);
     ui->tw_AnalyzedData->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tw_AnalyzedData->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tw_AnalyzedData->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tw_AnalyzedData->horizontalHeader()->resizeSections(QHeaderView::Stretch);
-
+    //ui->tw_AnalyzedData->horizontalHeader()->resizeSections(QHeaderView::Stretch);
+    ui->tw_AnalyzedData->horizontalHeader()->setStretchLastSection(true);
     ui->tw_MarkPointData->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tw_MarkPointData->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tw_MarkPointData->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tw_MarkPointData->horizontalHeader()->resizeSections(QHeaderView::Stretch);
-
+  //  ui->tw_MarkPointData->horizontalHeader()->resizeSections(QHeaderView::Stretch);
+    ui->tw_MarkPointData->horizontalHeader()->setStretchLastSection(true);
     TW_LeftParam->insertTab(0,ui->tw_AnalyzedData,tr("极柱"));
     TW_LeftParam->insertTab(1,ui->tw_MarkPointData,tr("MARK点"));
   //  ui->lab_x1  ->setReadOnly(1);
@@ -106,6 +109,8 @@ Widget::Widget(QWidget *parent)
     connect(this,SIGNAL(SendMark()),this,SLOT(ShowMark()));
     connect(this,SIGNAL(CloseLoadDialog()),this,SLOT(HideLoadDialog()));
     connect(ui->pb_Config,SIGNAL(clicked()),ConfigQFrame,SLOT(show()));
+    connect(this,SIGNAL(SendTips(QString)),LoadDialog,SLOT(setTipsText(QString)));
+   // connect(ui->PB_Load,&QPushButton::clicked,[&](){LoadDialog->setTipsText("加载中...");qApp->processEvents();});
 
 }
 
@@ -126,6 +131,7 @@ Widget::~Widget()
 void Widget::on_PB_Load_clicked()
 {
   //  ProgDialog->setVisible(0);
+    //  SendTips("加载中...");
     QStringList FilePath;
     FilePath.clear();
     if(fileDialog->exec())
@@ -150,11 +156,13 @@ void Widget::on_PB_Load_clicked()
         msg.exec();
         return ;
     }
+       SendTips("正在释放已加载资源...");
    int filenameIndex= FilePath.join("").lastIndexOf("/");
     FileName=FilePath.join("").mid(filenameIndex+1,FilePath.join("").length()-filenameIndex-5);
    //qDebug()<<FilePath.join("").length()-4<< " "<<FilePath.join("").length();
     LoadDialogCount=0;
 //    scene->clear();
+
     CircleData.clear();
     BatteryPostData.clear();
     BatteryList.clear();
@@ -171,9 +179,10 @@ void Widget::on_PB_Load_clicked()
     MarkPointPosText=new  QTextDocument();
     sortDistance=ConfigQFrame->m_findAngle;
     DistanceOfPost=ConfigQFrame->m_PostDistance.toDouble();
+    SendTips("正在解析DXF文件...");
     QFuture<bool> analyFuture=QtConcurrent::run(&Widget::AnalyzeFile,this,FilePath.join("/"));
     LoadDialog->show();
-
+   // SendTips("正在解析DXF文件...");
 /*
   //  analyFuture.waitForFinished();
     //return ;
@@ -637,7 +646,9 @@ void Widget::ShowTable()
         ui->tw_AnalyzedData->setColumnCount(3);
         ui->tw_AnalyzedData->setRowCount(0);
 
-
+        QStringList header;
+        header<<"x"<<"y"<<"是否导出";
+        ui->tw_AnalyzedData->setHorizontalHeaderLabels(header);
          tbRowCount=0;
         for (auto circle: SortedList)
         {
@@ -660,6 +671,9 @@ void Widget::ShowMark()
         ui->tw_MarkPointData->clear();
         ui->tw_MarkPointData->setColumnCount(3);
         ui->tw_MarkPointData->setRowCount(0);
+        QStringList header;
+        header<<"x"<<"y"<<"是否导出";
+        ui->tw_MarkPointData->setHorizontalHeaderLabels(header);
         RowCount=0;
         for(auto circle:MarkList)
         {
@@ -687,6 +701,7 @@ void Widget::HideLoadDialog()
         LoadDialogCount++;
         if(LoadDialogCount>=3)
         {
+         SendTips("成功...");
          LoadDialogCount=0;
          LoadDialog->hide();
         }
@@ -696,7 +711,7 @@ void Widget::HideLoadDialog()
 bool Widget::AnalyzeFile(QString FileNames)
 {
 
-
+        SendTips("正在解析DXF文件...");
       //  QFuture<bool> ClearFuture=QtConcurrent::run(&Widget::InitBuffer,this);
         dxfReader dxfreader(FileNames);
 
@@ -704,16 +719,18 @@ bool Widget::AnalyzeFile(QString FileNames)
         //    dx_iface *input = new dx_iface();
         //   bool  badState = input->fileImport( FileNames.join("/").toStdString(), &fData );
         //  QPen pen;
+          SendTips("启动过滤同心圆线程...");
         QFuture<bool> Filterfuture=   QtConcurrent::run(&Widget::CircleFilter,this,dxfreader.dxfCircle);
 
         CrosslineFlag=true;
         MarkCrosslineFlag=true;
         // pen.setColor(Qt::black);
         //  pen.setWidth(0);
+
         QFile f(FileNames);
         f.open(QIODevice::ReadOnly |QIODevice::Text);
-
         scale=0;
+          SendTips("获取dxf比率...");
         while(!f.atEnd())
         {
          if(f.readLine()=="$DIMLFAC\n")
@@ -721,16 +738,18 @@ bool Widget::AnalyzeFile(QString FileNames)
              if(f.readLine()==" 40\n")
              {
         scale= f.readLine().toDouble();
+                  SendTips("获取dxf比率完成...");
         break;
              }
          }
         }
         if(f.isOpen())f.close();
+         SendTips("解析mark点...");
          QFuture<bool> FilterMarkPoint=QtConcurrent::run(&Widget::MarkFilter,this,dxfreader.dxfCircle,scale);
       //  qDebug()<<"scale is:"<<scale;
         thread->m_Llist.clear();
         thread->m_clist.clear();
-
+          SendTips("加载绘制资源...");
         for(auto d: dxfreader.dxfLines) {
          // QLineF line(d.x1 , d.y1, d.x2,  d.y2);
          //LinesData << d;
@@ -759,10 +778,11 @@ bool Widget::AnalyzeFile(QString FileNames)
         }
         //ClearFuture.waitForFinished();
        // qDebug()<<"OutOfFture";
+          SendTips("启动绘制线程...");
         thread->start();
-
+          SendTips("等待同心圆过滤进程...");
         Filterfuture.waitForFinished();
-
+          SendTips("同心圆过滤结束...");
 //        bool repeated;
 //        //  analyFuture.waitForFinished();
 //        for(auto db : dxfreader.dxfCircle)
@@ -796,6 +816,7 @@ bool Widget::AnalyzeFile(QString FileNames)
         // qDebug()<<CircleData.count();
         bool jump=0;
         QList<int> Connected;
+         SendTips("查询符合极柱条件...");
         for (int i =0 ; i <CircleData.count() ;i++)
         {
          jump=0;
@@ -838,7 +859,7 @@ bool Widget::AnalyzeFile(QString FileNames)
         bm.Bottom.cx=QString::number(CircleData[i].cx,'f',3).toDouble();
         bm.Bottom.cy=QString::number(CircleData[i].cy,'f',3).toDouble();
         bm.Bottom.radius=QString::number(CircleData[i].radius,'f',3).toDouble();
-         bm.Scale=scale;
+        bm.Scale=scale;
         bm.Angle=0;
         bm.TopNumb=j;
         bm.BottomNumb=i;
@@ -886,10 +907,12 @@ bool Widget::AnalyzeFile(QString FileNames)
 
          }
         }
+         SendTips("查询极柱完成...");
         QMap<double,QList<BatteryMark>> row;
         QMap<int,QList<BatteryMark>> srow;
         //  bool filter=false;
         //  QList<double> index;
+        SendTips("排序查询结果...");
         if(sortDistance)
         {
          for (int i =0 ;i<BatteryList.count();i++)
@@ -1032,15 +1055,23 @@ bool Widget::AnalyzeFile(QString FileNames)
 //             BatteryPostData<<Bottom;
          }
         }
-
-
+          SendTips("排序查询结果完成...");
+          SendTips("生成表...");
         emit SendTable();
         FilterMarkPoint.waitForFinished();
+          SendTips("符合mark点查询完成...");
         emit SendMark();
-      //  QtConcurrent::run(&Widget::ShowMark,this);
-        auto d=thread->m_clist.at(0);
 
-        View->centerOn(d.cx,d.cy);
+      //  QtConcurrent::run(&Widget::ShowMark,this);
+        if(thread->m_Llist.count()>0)
+        {
+         auto d=thread->m_clist.at(0);
+
+         View->centerOn(d.cx,d.cy);
+        }
+        this->setWindowTitle("DXF解析软件-PATH-:"+FileNames);
+           SendTips("完成...");
+         SendTips("正在解析DXF文件...");
         return 1;
 }
 
@@ -1120,6 +1151,13 @@ bool Widget::InitBuffer()
 
 void Widget::on_pb_output_clicked()
 {
+        if(FileName.length()==0)
+        {
+         QMessageBox msg;
+         msg.setText("未加载文件");
+         msg.exec();
+         return ;
+        }
         QString Directory= outPutDialog->getExistingDirectory(this,"选择目录","./",QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks);
         if(Directory=="")
         {
@@ -1182,7 +1220,7 @@ void Widget::on_tw_MarkPointData_itemDoubleClicked(QTableWidgetItem *item)
         QPen pen;
         pen.setColor(QColorConstants::Svg::purple);
         pen.setWidth(3);
-         qDebug()<<r;
+     //    qDebug()<<r;
         r=r*10;
         QLineF line1(x,y+r,x,y-r);
         QLineF line2(x+r,y,x-r,y);

@@ -7,6 +7,7 @@ LoadingDialog::LoadingDialog(QWidget *parent) : QDialog(parent)
     //如果需要显示任务栏对话框则删除Qt::Tool
     setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
     setAttribute(Qt::WA_TranslucentBackground, true);
+    setWindowModality(Qt::ApplicationModal);
     initUi();
 }
 
@@ -69,6 +70,9 @@ void LoadingDialog::initUi()
 void LoadingDialog::setTipsText(QString strTipsText)
 {
     m_pTipsLabel->setText(strTipsText);
+    qApp->processEvents();
+    m_pTipsLabel->update();
+   // this->update();
 }
 
 /**

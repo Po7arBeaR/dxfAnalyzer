@@ -55,9 +55,9 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-unix:!macx: LIBS += -L$$PWD/dxfrw/ -llibdxfrw
+#unix:!macx: LIBS += -L$$PWD/dxfrw/ -llibdxfrw
 
-INCLUDEPATH += $$PWD/dxfrw
-DEPENDPATH += $$PWD/dxfrw
+#INCLUDEPATH += $$PWD/dxfrw
+#DEPENDPATH += $$PWD/dxfrw
 
-unix:!macx: PRE_TARGETDEPS += $$PWD/dxfrw/liblibdxfrw.a
+#unix:!macx: PRE_TARGETDEPS += $$PWD/dxfrw/liblibdxfrw.a
